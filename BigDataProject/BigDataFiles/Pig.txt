@@ -1,0 +1,57 @@
+#Loading csv file
+>DEFINE CSVLoader org.apache.pig.piggybank.storage.CSVLoader();
+>h1b_data = LOAD '/user/big_data_project/dataset.csv' using CSVLoader(',') AS (Sr_no:int, case_status:chararray, Employer_name:chararray, Soc_name:chararray,   
+ Job_title:chararray, full_time_position:chararray, prevailing_wage:chararray, year:chararray, worksite:chararray, longitude:double, latitude:double);
+>limit_data = LIMIT h1b_data 10;
+>dump limit_data;
+
+# Query 1 : Which worksite has popular job title?
+>Limitdata = foreach h1b_data generate worksite, Job_title;
+>group1 = group Limitdata by (worksite, Job_title);
+>count_job = foreach group1 generate FLATTEN(group) as (worksite, Job_title), COUNT(Limitdata) as count_no;
+>after = group count_job by job_title;
+>final = foreach after { sort = order count_job by Job_title desc; limiter = LIMIT sort 10; Generate limiter;};
+>query1 = foreach final generate FLATTEN(limiter);
+
+# Query 2 : Is number of petitions with Data Engineer job title increasing over time?
+>Limit_data_1 = foreach h1b_data generate year, Job_title;
+>filter_job = FILTER Limit_data_1 by job_title matches 'DATA ENGINEER';
+>group_yr = Group filter_job by year;
+>count_yr = foreach group_yr generate filter_job.year, COUNT(filter_job);
+>lim_count_yr = Limit count_yr 10;
+>dump lim_count_yr;
+
+# Query 3 : Which part of US has most data engineer jobs?
+>filter_data = filter h1b_data by Job_title matches 'DATA ENGINEER';
+>lim_data = foreach filter_data generate worksite;
+>group_work = group lim_data by worksite;
+>count_work = foreach group_work generate lim_data.worksite, COUNT(limit_data);
+>lim_count = LIMIT count_work 10;
+>dump lim_count;
+
+#Query 4 : Which industry has greatest number of Data scientist position?
+>lim_d = foreach h1b_data by Soc_name, Job_title;
+>filter_d = FILTER lim_d by Job_title matches 'DATA SCIENTIST';
+>group_d = Group filter_d by Soc_name;
+>count_d = foreach group_d generate filter_d.Soc_name, COUNT(filter_d);
+>limit_count_d = LIMIT count_d 10;
+>dump limit_count_d;
+
+#Query 5 : Which employer files the most petitions each year?
+>lim1 = foreach h1b_data generate Employer_name, year;
+>group1 = group lim1 by (Employer_name,year);
+>count_yr = Foreach group1 generate lim1.Employer_name, lim1.year, COUNT(lim1);
+>lim_count_yr = LIMIT count_yr 10;
+>dump lim_count_yr; 
+
+
+
+
+
+
+
+
+
+
+
+ 

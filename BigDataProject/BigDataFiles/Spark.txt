@@ -1,0 +1,32 @@
+# SPARK COMMANDS
+
+>df = sqlContext.read.load('/user/big_data_project/dataset.csv', format = 'com.databricks.spark.csv', header = 'true', inferSchema='true')
+>df.count()
+>df.dtypes
+
+# Creating new temporary view 
+>df.createOrReplaceTempView("h1b")
+
+#Query 1:Which worksite has popular job title?
+>query1 = spark.sql("select worksite, job_title, count(job_title) from h1b group by worksite, job_title Order by job_title desc").show()
+
+
+#Query 2: Is number of petitions with Data Engineer job title increasing over time?
+>query2 = spark.sql("select year, count(year) from big_data.h1b where job_title like '%DATA ENGINEER%' Group by year").show()
+
+#Query 3: Which part of US has most data engineer jobs?
+>query3 = spark.sql("select worksite, count(worksite) from h1b where job_title like '%DATA ENGINEER%' Group by worksite Order by worksite").show()
+
+
+#Query 4: Which industry has greatest number of Data scientist position?
+>query4 = spark.sql("select soc_name, Count(soc_name) from h1b where job_title like '%DATA SCIENTIST%' Group by soc_name Order by soc_name").show()
+
+
+#query 5: Which employer files the most petitions each year?
+>query5 = spark.sql("select employer_name, year, count(year) from h1b group by year,employer_name order by year").show()
+
+#Query 6: What is the general trend of the employer’s H1b status in the period 2011-16?
+>query6 = spark.sql("select year, count(year) from h1b where case_status = 'CERTIFIED' group by year Order by year desc").show()
+
+#Query 7: What is general trend of the employer name with respect to the year?
+>query7 = spark.sql("select year, employer_name, count(employer_name) from h1b group by employer_name, year order by employer_name").show()
